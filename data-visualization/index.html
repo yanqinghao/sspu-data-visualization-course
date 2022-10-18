@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>算盘前面板插件</title>
+    <link rel="stylesheet" href="node_modules/suanpan-sdk/dist/dashboard.css" />
+    <link rel="stylesheet" href="node_modules/grapesjs/dist/css/grapes.min.css" />
+    <link rel="stylesheet" href="libs/iconfont/iconfont.css" />
+
+    <script src="node_modules/jquery/dist/jquery.js"></script>
+    <script src="node_modules/suanpan-sdk/dist/suanpan-sdk.dashboard.min.js"></script>
+    <script src="/sp-frontpanel-plugin-standalone.min.js"></script>
+    <script src="node_modules/echarts/dist/echarts.min.js"></script>
+    <script src="./libs/jquery.modal.min.js"></script>
+    <script src="./node_modules/grapesjs/dist/grapes.min.js"></script>
+    <script src="./node_modules/grapesjs-blocks-basic/dist/grapesjs-blocks-basic.min.js"></script>
+    <script src='./libs/iconfont/iconfont.js'></script>
+
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        font-size: 10px;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <style>
+      .front-panel {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        background-color: #000;
+      }
+
+      .front-panel .panels {
+        width: 100%;
+        color: #bcc9d4;
+        background-color: #1e2127;
+        overflow: hidden;
+        margin-bottom: 10px;
+      }
+
+      .front-panel .panels .panel-title {
+        height: 40px;
+        background-color: #2e343b;
+        font-size: 14px;
+        line-height: 40px;
+        padding-left: 20px;
+        text-align: left;
+      }
+
+      .front-panel .left-section {
+        width: 300px;
+        height: 100%;
+        position: relative;
+      }
+
+      .front-panel .left-section .block-container {
+        height: 50%;
+      }
+
+      .front-panel .left-section .block-container #blocks {
+        height: calc(100% - 40px);
+        overflow-y: auto;
+      }
+
+      .front-panel .left-section .block-container #blocks .gjs-blocks-cs .gjs-block-categories {
+        font-size: 14px;
+      }
+
+      .front-panel
+        .left-section
+        .block-container
+        #blocks
+        .gjs-blocks-cs
+        .gjs-block-categories
+        .gjs-blocks-c
+        .gjs-block {
+        width: 28%;
+      }
+
+      .front-panel
+        .left-section
+        .block-container
+        #blocks
+        .gjs-blocks-cs
+        .gjs-block-categories
+        .gjs-blocks-c
+        .gjs-block.fa {
+        font-size: 28px;
+        line-height: 56px;
+      }
+
+      .front-panel .left-section .block-container #blocks .gjs-blocks-cs .gjs-block-label {
+        font-size: 14px;
+      }
+
+      .front-panel .left-section .layers-container {
+        height: 50%;
+      }
+
+      .front-panel .left-section .layers-container #layers {
+        height: calc(100% - 40px);
+        overflow-y: auto;
+      }
+
+      .front-panel .left-section .layers-container #layers .gjs-layer {
+        font-size: 1.4rem;
+      }
+
+      .front-panel .left-section .layers-container #layers .gjs-layer .gjs-layer-vis {
+        padding: 8px 5px 7px 10px;
+      }
+
+      .front-panel .left-section .layers-container #layers .gjs-layer .gjs-layer-count {
+        top: 4px;
+      }
+
+      .front-panel
+        .left-section
+        .layers-container
+        #layers
+        .gjs-layer
+        .gjs-layer-title-c
+        .gjs-layer-title {
+        font-size: 14px;
+        line-height: 14px;
+      }
+
+      .front-panel
+        .left-section
+        .layers-container
+        #layers
+        .gjs-layer
+        .gjs-layer-title-c
+        .gjs-layer-title
+        .gjs-layer-caret {
+        top: 5px;
+        font-size: 1.2rem;
+      }
+
+      .front-panel .main-section {
+        height: 100%;
+        flex: 1;
+        position: relative;
+      }
+
+      .front-panel .main-section .editor-container {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+        background-color: #292c32;
+      }
+
+      .front-panel .main-section .editor-container .editor-viewport {
+        width: calc(100% - 68px);
+        height: calc(100% - 68px);
+        position: absolute;
+        top: 48px;
+        left: 48px;
+        z-index: 2;
+      }
+
+      .front-panel .main-section .editor-container .editor-viewport #gjs {
+        height: 100% !important;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .front-panel .main-section .editor-container .editor-viewport #gjs .gjs-devices-c {
+        padding: 0;
+      }
+
+      .front-panel .main-section .editor-container .editor-viewport #gjs .gjs-pn-panel {
+        position: relative;
+      }
+
+      .front-panel .main-section .editor-container .editor-viewport #gjs .gjs-cv-canvas {
+        width: 100% !important;
+        height: 100%;
+        top: 0;
+      }
+
+      .front-panel .main-section .editor-container .editor-viewport #gjs .gjs-block-label {
+        display: none;
+      }
+
+      .front-panel .main-section .rg-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        z-index: 1;
+      }
+
+      .front-panel .main-section .guide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 9991;
+        font-size: 0;
+      }
+
+      .front-panel .main-section .guide.v {
+        width: 1px;
+        height: 7000px;
+        border-right: solid 1px #00f;
+        cursor: col-resize;
+      }
+
+      .front-panel .main-section .guide.h {
+        width: 3000px;
+        height: 1px;
+        border-bottom: solid 1px #00f;
+        cursor: row-resize;
+      }
+
+      .front-panel .main-section .info {
+        width: 50px;
+        height: 25px;
+        line-height: 25px;
+        text-align: center;
+        position: relative;
+        font-size: 13px;
+        background-color: #eee;
+        border: solid 1px #ccc;
+        color: #000;
+      }
+
+      .front-panel .main-section .guide.v .info {
+        left: 2px;
+      }
+
+      .front-panel .main-section .guide.h .info {
+        top: 2px;
+      }
+
+      .front-panel .main-section .unselectable {
+        -moz-user-select: -moz-none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      .front-panel .main-section .ruler {
+        background-color: #0f0f14;
+        color: #90a0af;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 9990;
+      }
+
+      .front-panel .main-section .ruler .label {
+        font: 12px Arial;
+        color: #90a0af;
+      }
+
+      .front-panel .main-section .ruler,
+      .front-panel .main-section .ruler span {
+        font-size: 0;
+      }
+
+      .front-panel .main-section .ruler.h {
+        width: 3000px;
+        height: 28px;
+        left: -1px;
+        padding-left: 48px;
+        border-bottom: solid 1px #000;
+      }
+
+      .front-panel .main-section .ruler.v {
+        height: 7000px;
+        top: -1px;
+        padding-top: 48px;
+        width: 28px;
+        border-right: solid 1px #000;
+      }
+
+      .front-panel .main-section .ruler.h span {
+        border-left: solid 1px #0f0f0f;
+        height: 9px;
+        width: 1px;
+        vertical-align: top;
+        display: inline-block;
+        *display: inline;
+        zoom: 1;
+      }
+
+      .front-panel .main-section .ruler.v span {
+        display: block;
+        margin-right: 0;
+        border-top: solid 1px #0f0f0f;
+        width: 9px;
+        height: 1px;
+      }
+
+      .front-panel .main-section .ruler.v span.major {
+        border-top: solid 1px #90a0af;
+        width: 6px;
+      }
+
+      .front-panel .main-section .ruler.v span.milestone {
+        position: relative;
+        border-top: solid 1px #90a0af;
+        width: 8px;
+      }
+
+      .front-panel .main-section .ruler.v span.label {
+        border: 0;
+        font-size: 9px;
+        position: absolute;
+        text-align: center;
+        width: 9px;
+        transform: rotate(-90deg);
+      }
+
+      .front-panel .main-section .ruler.h span.major {
+        border-left: solid 1px #90a0af;
+        height: 6px;
+      }
+
+      .front-panel .main-section .ruler.h span.milestone {
+        position: relative;
+        border-left: solid 1px #90a0af;
+        height: 8px;
+      }
+
+      .front-panel .main-section .ruler.h span.label {
+        border: 0;
+        font-size: 9px;
+        position: absolute;
+        text-align: center;
+        top: 10px;
+        width: 9px;
+      }
+
+      .front-panel .main-section .ruler.h .l10 {
+        left: -5px;
+      }
+
+      .front-panel .main-section .ruler.h .l100 {
+        left: -7px;
+      }
+
+      .front-panel .main-section .ruler.h .l1000 {
+        left: -10px;
+      }
+
+      .front-panel .main-section .ruler.v .l10,
+      .front-panel .main-section .ruler.v .l100,
+      .front-panel .main-section .ruler.v .l1000 {
+        top: -7px;
+      }
+
+      .front-panel .main-section .ruler.v .l10 {
+        left: 8px;
+      }
+
+      .front-panel .main-section .ruler.v .l100 {
+        left: 8px;
+      }
+
+      .front-panel .main-section .ruler.v .l1000 {
+        left: 8px;
+      }
+
+      .front-panel .main-section .menu-btn {
+        position: fixed;
+        left: 3px;
+        top: 2px;
+        line-height: 9px;
+        z-index: 9998;
+        width: 20px;
+        height: 20px;
+        background-color: red;
+        opacity: 0.5;
+        font-size: 20px;
+        text-align: left;
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+        border-radius: 2px;
+      }
+
+      .front-panel .main-section .rg-menu {
+        position: fixed;
+        top: 22px;
+        left: 3px;
+        padding: 0;
+        margin: 0;
+        list-style: 0;
+        display: none;
+        font: 13px Arial;
+        z-index: 9999;
+        box-shadow: 2px 2px 10px #ccc;
+      }
+
+      .front-panel .main-section .rg-menu li {
+        text-align: left;
+        border-bottom: solid 1px #999;
+        padding: 0;
+      }
+
+      .front-panel .main-section .rg-menu a {
+        background-color: #777;
+        display: block;
+        padding: 5px;
+        text-decoration: none;
+        color: #fff;
+        line-height: 18px;
+      }
+
+      .front-panel .main-section .rg-menu a:hover,
+      .front-panel .main-section .rg-menu a.selected {
+        color: #fff;
+        background-color: #3b94ec;
+      }
+
+      .front-panel .main-section .rg-menu a.disabled {
+        color: #ccc;
+      }
+
+      .front-panel .main-section .rg-menu .desc {
+        display: inline-block;
+        width: 170px;
+      }
+
+      .front-panel .main-section .dialog {
+        position: fixed;
+        background-color: #777;
+        z-index: 9999;
+        color: #fff;
+        font-size: 13px;
+        display: none;
+        box-shadow: 2px 2px 10px #ccc;
+      }
+
+      .front-panel .main-section .dialog button {
+        border: 0;
+        color: #333;
+        cursor: pointer;
+        background-color: #eaeaea;
+        background-image: linear-gradient(#fafafa, #eaeaea);
+        background-repeat: repeat-x;
+        border-radius: 3px;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+      }
+
+      .front-panel .main-section .dialog input,
+      .front-panel .main-section .dialog select,
+      .front-panel .main-section .dialog button {
+        font-size: 13px;
+        margin: 3px;
+        padding: 3px;
+      }
+
+      .front-panel .main-section .dialog .title-bar {
+        padding: 5px;
+        background-color: #aaa;
+        font-weight: 700;
+      }
+
+      .front-panel .main-section .dialog .wrapper {
+        padding: 10px;
+      }
+
+      .front-panel .main-section .open-dialog select,
+      .front-panel .main-section .open-dialog button {
+        float: left;
+        display: block;
+      }
+
+      .front-panel .main-section .open-dialog .ok-btn,
+      .front-panel .main-section .open-dialog .cancel-btn {
+        margin: 10px 3px;
+      }
+
+      .front-panel .main-section .open-dialog .ok-btn {
+        clear: both;
+      }
+
+      .front-panel .main-section .snap-dialog label {
+        font-weight: 700;
+        padding: 3px;
+      }
+
+      .front-panel .main-section .snap-dialog .ok-btn {
+        margin-left: 18px;
+      }
+
+      .front-panel .main-section .snap-dialog .ok-btn,
+      .front-panel .main-section .snap-dialog .cancel-btn {
+        margin-top: 10px;
+      }
+
+      .front-panel .main-section .snap-dialog .rg-y-label {
+        margin-left: 10px;
+      }
+
+      .front-panel .main-section #rg-x-snap,
+      .front-panel .main-section #rg-y-snap {
+        width: 50px;
+      }
+
+      .front-panel .main-section .info-block-wrapper {
+        position: absolute;
+        z-index: 9989;
+      }
+
+      .front-panel .main-section .info-block {
+        position: absolute;
+        text-align: left;
+      }
+
+      .front-panel .main-section .info-block.even {
+        background: 0 0;
+        background-color: rgba(0, 0, 255, 0.2);
+        -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#330000FF, endColorstr=#330000FF);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#330000FF, endColorstr=#330000FF);
+        zoom: 1;
+      }
+
+      .front-panel .main-section .info-block.odd {
+        background: 0 0;
+        background-color: rgba(255, 0, 0, 0.2);
+        -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#33FF0000, endColorstr=#33FF0000);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#33FF0000, endColorstr=#33FF0000);
+        zoom: 1;
+      }
+
+      .front-panel .main-section .info-block-txt {
+        padding: 5px;
+        display: inline-block;
+        vertical-align: top;
+        background-color: #777;
+        color: #fff;
+        font-size: 13px;
+        *display: inline;
+        zoom: 1;
+      }
+
+      .front-panel .right-section {
+        width: 300px;
+        height: 100%;
+        position: relative;
+        box-shadow: -2px 0 0 #000;
+      }
+
+      .front-panel .right-section .style-container {
+        height: 100%;
+        overflow-y: auto;
+      }
+
+      .front-panel .right-section .style-container .gjs-sm-properties {
+        font-size: 1.2rem;
+      }
+
+      .front-panel .right-section .style-container .gjs-sm-properties .gjs-sm-label {
+        font-size: 14px;
+        line-height: 14px;
+      }
+
+      .front-panel .right-section .style-container #traits .gjs-trt-traits .gjs-trt-trait {
+        font-size: 14px;
+        line-height: 14px;
+      }
+    </style>
+  </head>
+
+  <body onload="init()">
+    <script type="text/javascript">
+      function init() {
+        const sectors = [
+          {
+            name: '样式设置',
+            open: true,
+            buildProps: ['width', 'height', 'left', 'top'],
+            properties: [
+              {
+                property: 'height',
+                type: 'integer',
+                units: ['px', '%', 'vh'],
+                defaults: '自动',
+                fixedValues: ['initial', 'inherit', 'auto'],
+                min: 0,
+              },
+              {
+                property: 'width',
+                type: 'integer',
+                units: ['px', '%', 'vw'],
+                defaults: '自动',
+                fixedValues: ['initial', 'inherit', 'auto'],
+                min: 0,
+              },
+            ],
+          },
+          {
+            name: '高级设置',
+            open: false,
+            buildProps: [
+              'color',
+              'font-family',
+              'background',
+              'background-color',
+              'border',
+              'border-radius-c',
+              'border-radius',
+              'font-size',
+              'font-weight',
+              'text-align',
+              'float',
+              'position',
+              'right',
+              'bottom',
+              'z-index',
+              'display',
+              'padding',
+              'margin',
+              'max-width',
+              'min-height',
+              'letter-spacing',
+              'line-height',
+              'text-shadow',
+              'box-shadow',
+              'flex-direction',
+              'flex-wrap',
+              'justify-content',
+              'align-items',
+              'flex-basis',
+              'flex-grow',
+              'flex-shrink',
+              'align-self',
+            ],
+            properties: [
+              {
+                property: 'color',
+                type: 'color',
+                defaults: '#000',
+              },
+              {
+                property: 'background',
+                type: 'stack',
+                preview: true,
+                detached: true,
+                properties: [
+                  {
+                    name: '背景图片',
+                    property: 'background-image',
+                    type: 'file',
+                    functionName: 'url',
+                  },
+                  {
+                    name: '背景图重复方式',
+                    property: 'background-repeat',
+                    type: 'select',
+                    defaults: 'repeat',
+                    list: [
+                      { value: 'repeat', name: '双向重复' },
+                      { value: 'repeat-x', name: '横向重复' },
+                      { value: 'repeat-y', name: '纵向重复' },
+                      { value: 'no-repeat', name: '不重复' },
+                    ],
+                  },
+                  {
+                    name: '背景图起始位置',
+                    property: 'background-position',
+                    type: 'select',
+                    defaults: 'left top',
+                    list: [
+                      { value: 'left top', name: '左侧顶部' },
+                      { value: 'left center', name: '左侧中部' },
+                      { value: 'left bottom', name: '左侧底部' },
+                      { value: 'right top', name: '右侧顶部' },
+                      { value: 'right center', name: '右侧中部' },
+                      { value: 'right bottom', name: '右侧底部' },
+                      { value: 'center top', name: '中间顶部' },
+                      { value: 'center center', name: '中间中部' },
+                      { value: 'center bottom', name: '中间底部' },
+                    ],
+                  },
+                  {
+                    name: '背景图滚动方式',
+                    property: 'background-attachment',
+                    type: 'select',
+                    defaults: 'scroll',
+                    list: [
+                      { value: 'scroll', name: '相对元素固定' },
+                      { value: 'fixed', name: '相对页面固定' },
+                      { value: 'local', name: '相对元素内容固定' },
+                    ],
+                  },
+                  {
+                    name: '背景图尺寸',
+                    property: 'background-size',
+                    type: 'select',
+                    defaults: 'auto',
+                    list: [
+                      { value: 'auto', name: '自动' },
+                      { value: 'cover', name: '覆盖画布' },
+                      { value: 'contain', name: '包含于画布' },
+                    ],
+                  },
+                ],
+              },
+              { property: 'background-color', type: 'color', defaults: '无' },
+              {
+                property: 'text-align',
+                list: [
+                  { value: 'left', className: 'fa fa-align-left' },
+                  { value: 'center', className: 'fa fa-align-center' },
+                  { value: 'right', className: 'fa fa-align-right' },
+                  { value: 'justify', className: 'fa fa-align-justify' },
+                ],
+              },
+              {
+                property: 'position',
+                type: 'radio',
+                defaults: 'static',
+                list: [
+                  { value: 'static', name: '静态定位' },
+                  { value: 'relative', name: '相对定位' },
+                  { value: 'absolute', name: '绝对定位' },
+                  { value: 'fixed', name: '固定定位' },
+                ],
+              },
+              {
+                property: 'border',
+                type: 'composite',
+                properties: [
+                  {
+                    property: 'border-width',
+                    type: 'integer',
+                    units: ['px', 'em'],
+                    defaults: 0,
+                    min: 0,
+                  },
+                  {
+                    property: 'border-style',
+                    type: 'select',
+                    defaults: 'solid',
+                    list: [
+                      { value: 'none', name: '无边框' },
+                      { value: 'solid', name: '实线边框' },
+                      { value: 'dotted', name: '点线边框' },
+                      { value: 'dashed', name: '虚线边框' },
+                      { value: 'double', name: '双线边框' },
+                      { value: 'groove', name: '3D凹槽边框' },
+                      { value: 'ridge', name: '3D凸起边框' },
+                      { value: 'inset', name: '3D凹边' },
+                      { value: 'outset', name: '3D凸边' },
+                    ],
+                  },
+                  {
+                    property: 'border-color',
+                    type: 'color',
+                    defaults: '#000',
+                  },
+                ],
+              },
+              {
+                name: '加粗',
+                property: 'font-weight',
+                type: 'select',
+                defaults: '400',
+                list: [
+                  { value: '100', name: '100px' },
+                  { value: '200', name: '200px' },
+                  { value: '300', name: '300px' },
+                  { value: '400', name: '400px' },
+                  { value: '500', name: '500px' },
+                  { value: '600', name: '600px' },
+                  { value: '700', name: '700px' },
+                  { value: '800', name: '800px' },
+                  { value: '900', name: '900px' },
+                ],
+              },
+              {
+                property: 'float',
+                type: 'radio',
+                defaults: 'none',
+                list: [
+                  { value: 'none', name: '无' },
+                  { value: 'left', name: '向左浮动' },
+                  { value: 'right', name: '向右浮动' },
+                ],
+              },
+              {
+                property: 'display',
+                type: 'select',
+                defaults: 'block',
+                list: [
+                  { value: 'block', name: '块级元素' },
+                  { value: 'inline', name: '内联元素' },
+                  { value: 'inline-block', name: '行内块级元素' },
+                  { value: 'flex', name: '弹性布局元素' },
+                  { value: 'none', name: '元素隐藏' },
+                ],
+              },
+              {
+                property: 'text-shadow',
+                type: 'stack',
+                preview: true,
+                defaults: 'none',
+                properties: [
+                  {
+                    property: 'text-shadow-h',
+                    type: 'integer',
+                    units: ['px', '%'],
+                    defaults: 0,
+                  },
+                  {
+                    property: 'text-shadow-v',
+                    type: 'integer',
+                    units: ['px', '%'],
+                    defaults: 0,
+                  },
+                  {
+                    property: 'text-shadow-blur',
+                    type: 'integer',
+                    units: ['px', '%'],
+                    defaults: 0,
+                    min: 0,
+                  },
+                  {
+                    property: 'text-shadow-color',
+                    type: 'color',
+                    defaults: '#000',
+                  },
+                ],
+              },
+              {
+                property: 'box-shadow',
+                type: 'stack',
+                preview: true,
+                properties: [
+                  {
+                    property: 'box-shadow-h',
+                    type: 'integer',
+                    units: ['px', '%'],
+                    defaults: 0,
+                  },
+                  {
+                    property: 'box-shadow-v',
+                    type: 'integer',
+                    units: ['px', '%'],
+                    defaults: 0,
+                  },
+                  {
+                    property: 'box-shadow-blur',
+                    type: 'integer',
+                    units: ['px'],
+                    defaults: '5px',
+                    min: 0,
+                  },
+                  {
+                    property: 'box-shadow-spread',
+                    type: 'integer',
+                    units: ['px'],
+                    defaults: 0,
+                  },
+                  {
+                    property: 'box-shadow-color',
+                    type: 'color',
+                    defaults: '#000',
+                  },
+                  {
+                    property: 'box-shadow-type',
+                    type: 'select',
+                    defaults: '',
+                    list: [
+                      { value: '', name: '外侧阴影' },
+                      { value: 'inset', name: '内侧阴影' },
+                    ],
+                  },
+                ],
+              },
+              {
+                property: 'justify-content',
+                type: 'select',
+                defaults: 'flex-start',
+                list: [
+                  { value: 'flex-start', name: '从行首开始排列' },
+                  { value: 'flex-end', name: '从行尾开始排列' },
+                  { value: 'center', name: '居中排列' },
+                  {
+                    value: 'space-between',
+                    name: '均匀排列（首个元素位于起点，末尾元素位于终点）',
+                  },
+                  { value: 'space-around', name: '均匀排列（每个元素周围分配相同的空间）' },
+                  { value: 'space-evenly', name: '均匀排列（每个元素之间的间隔相等）' },
+                ],
+                requires: { display: ['flex'] },
+              },
+              {
+                property: 'flex-direction',
+                type: 'select',
+                defaults: 'row',
+                list: [
+                  { value: 'row', name: '横向排列' },
+                  { value: 'row-reverse', name: '反转横向排列' },
+                  { value: 'column', name: '纵向排列' },
+                  { value: 'column-reverse', name: '反转纵向排列' },
+                ],
+                requires: { display: ['flex'] },
+              },
+              {
+                property: 'flex-wrap',
+                type: 'select',
+                defaults: 'nowrap',
+                list: [
+                  { value: 'nowrap', name: '不换行' },
+                  { value: 'wrap', name: '自动换行' },
+                  { value: 'wrap-reverse', name: '换行（反转排列）' },
+                ],
+                requires: { display: ['flex'] },
+              },
+              {
+                property: 'align-items',
+                type: 'select',
+                defaults: 'stretch',
+                list: [
+                  { value: 'flex-start', name: '向侧轴起点对齐' },
+                  { value: 'flex-end', name: '向侧轴终点对齐' },
+                  { value: 'center', name: '在侧轴居中' },
+                  { value: 'baseline', name: '向基线对齐' },
+                  { value: 'stretch', name: '元素拉伸适应容器' },
+                ],
+                requires: { display: ['flex'] },
+              },
+              {
+                property: 'flex-basis',
+                type: 'integer',
+                units: ['px', '%', 'vw', 'vh'],
+                defaults: '自动',
+                fixedValues: ['initial', 'inherit'],
+                requiresParent: { display: ['flex'] },
+                min: 0,
+              },
+              {
+                property: 'align-self',
+                type: 'select',
+                defaults: 'auto',
+                list: [
+                  { value: 'auto', name: '自动' },
+                  { value: 'flex-start', name: '位于容器的顶部' },
+                  { value: 'flex-end', name: '位于容器的尾部' },
+                  { value: 'center', name: '位于容器的中心' },
+                  { value: 'baseline', name: '位于容器基线上' },
+                  { value: 'stretch', name: '元素拉伸适应容器' },
+                ],
+                requiresParent: { display: ['flex'] },
+              },
+              {
+                property: 'max-width',
+                type: 'integer',
+                units: ['px', '%', 'vh'],
+                defaults: '自动',
+                fixedValues: ['initial', 'inherit', 'auto'],
+                min: 0,
+              },
+              {
+                property: 'min-height',
+                type: 'integer',
+                units: ['px', '%', 'vh'],
+                defaults: '自动',
+                fixedValues: ['initial', 'inherit', 'auto'],
+                min: 0,
+              },
+              {
+                property: 'letter-spacing',
+                type: 'integer',
+                units: ['px', 'em', 'rem', '%'],
+                defaults: '默认',
+                fixedValues: ['normal', 'initial', 'inherit'],
+              },
+              {
+                property: 'line-height',
+                type: 'integer',
+                units: ['px', 'em', 'rem', '%'],
+                defaults: '默认',
+                fixedValues: ['normal', 'initial', 'inherit'],
+              },
+            ],
+          },
+        ];
+
+        var editor = window.spFPanelWrapper.init({
+          container: '#gjs',
+          plugins: [...Object.keys(window.spFPanelWrapper.getAllPlugins()), ...Object.keys(grapesjs.plugins.getAll())],
+          pluginsOpts: {
+            'gjs-blocks-basic': {
+              blocks: ['column1', 'column2', 'column3', 'column3-7'],
+              labelColumn1: '列式布局',
+              labelColumn2: '两列分栏布局',
+              labelColumn3: '三列分栏布局',
+              labelColumn37: '3/7分栏布局',
+            },
+          },
+          layerManager: {
+            appendTo: '#layers',
+          },
+          blockManager: {
+            appendTo: '#blocks',
+          },
+          styleManager: {
+            // 设置的属性都通过Traits的形式展现
+            appendTo: '#styles',
+            clearProperties: 1,
+            sectors,
+          },
+          storageManager: {
+            type: 'sp-storage',
+            autosave: 1,
+            autoload: 0,
+          },
+          traitManager: {
+            appendTo: '#traits',
+          },
+          panels: {
+            defaults: [
+              {
+                id: 'layers',
+                el: '#layers-container',
+                resizable: {
+                  tc: 0,
+                  cr: 1,
+                  bc: 0,
+                  keyWidth: 'flex-basis',
+                },
+              },
+              {
+                id: 'styles',
+                el: '#style-container',
+                resizable: {
+                  tc: 0,
+                  cr: 0,
+                  cl: 1,
+                  bc: 0,
+                  keyWidth: 'flex-basis',
+                },
+              },
+            ],
+          },
+          canvas: {
+            scripts: [
+              './node_modules/jquery/dist/jquery.js',
+              './node_modules/suanpan-sdk/dist/suanpan-sdk.dashboardPage.min.js',
+            ],
+            styles: ['./node_modules/suanpan-sdk/dist/dashboardPage.css', './dist/sp-frontpanel-plugin-standalone.css'],
+          },
+        });
+
+        window.editor = editor;
+      }
+    </script>
+    <div class="front-panel">
+      <div class="left-section">
+        <div id="block-container" class="block-container panels">
+          <p class="panel-title">内置组件</p>
+          <div id="blocks"></div>
+        </div>
+        <div id="layers-container" class="layers-container panels">
+          <p class="panel-title">图层元素</p>
+          <div id="layers"></div>
+        </div>
+      </div>
+      <div class="main-section">
+        <div id="editor-container" class="editor-container">
+          <div id="editor-viewport" class="editor-viewport" ng-style="viewportZoom">
+            <div id="gjs"></div>
+          </div>
+        </div>
+      </div>
+      <div class="right-section">
+        <div id="style-container" class="style-container panels">
+          <p class="panel-title">页面设置</p>
+          <div id="traits" class="traits-manager"></div>
+          <div id="styles" class="style-manager"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
